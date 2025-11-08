@@ -88,7 +88,8 @@ WHERE {
   
   try {
     const data = await sparqlQuery(query, queryVariables); 
-    
+    console.log(`[Backend] Datos de GraphDB (Bikes): ${data.length} resultados.`);
+
     console.log("--> [SPARQL] Mostrando los 2 primeros resultados BRUTOS (Bikes):");
     console.log(JSON.stringify(data.slice(0, 2), null, 2));
 
@@ -153,7 +154,8 @@ WHERE {
 }`;
   try {
     const data = await sparqlQuery(query, queryVariables);
-    
+    console.log(`[Backend] Datos de GraphDB (Bars): ${data.length} resultados.`);
+
     console.log("--> [SPARQL] Mostrando los 2 primeros resultados BRUTOS (Bars):");
     console.log(JSON.stringify(data.slice(0, 2), null, 2));
 
