@@ -2,7 +2,7 @@
 
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-
+// esto en produccion se ignora
 export default defineConfig({
   plugins: [react()],
   server: {
