@@ -217,10 +217,11 @@ app.get('/api/districts', async (req, res) => {
 
 
 const PORT = process.env.PORT || 4000;
+const HOST = '0.0.0.0'; // <-- 1. AÑADE ESTA LÍNEA
 
 initializeStore()
   .then(() => {
-    app.listen(PORT, () => console.log(`\n-> [BACKEND] Servidor escuchando en http://localhost:${PORT}`));
+    app.listen(PORT, HOST, () => console.log(`\n-> [BACKEND] Servidor escuchando en http://${HOST}:${PORT}`));
   })
   .catch(error => {
     console.error("!!! [ERROR] Error fatal al inicializar la base de datos:", error);

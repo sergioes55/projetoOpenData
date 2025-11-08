@@ -7,6 +7,7 @@ import SearchBar from './components/SearchBar';
 import FilterButtons from './components/FilterButtons';
 import DistrictList from './components/DistrictList';
 
+const API_URL = import.meta.env.FRONT_URL || ''; // Para producción usará Render, para local usará el proxy
 // --- 1. FUNCIÓN PARA CALCULAR DISTANCIA (Fórmula de Haversine) ---
 // Esta función calcula la distancia en KM entre dos puntos (lat/lon)
 function getDistance(lat1, lon1, lat2, lon2) {
@@ -41,9 +42,9 @@ function App() {
     const fetchData = async () => {
       try {
         const [bikesRes, barsRes, districtsRes] = await Promise.all([
-          axios.get('/api/bikingStations'),
-          axios.get('/api/bars'),
-          axios.get('/api/districts')
+          axios.get(`${API_URL}/api/bikingStations`), // <-- MODIFICADO
+          axios.get(`${API_URL}/api/bars`),           // <-- MODIFICADO
+          axios.get(`${API_URL}/api/districts`)     // <-- MODIFICADO
         ]);
         const bikeData = bikesRes.data.map(b => ({ ...b, type: 'bike' }));
         const barData = barsRes.data.map(b => ({ ...b, type: 'bar' }));
