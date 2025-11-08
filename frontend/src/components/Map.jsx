@@ -1,11 +1,12 @@
-// src/components/Map.jsx (CORREGIDO)
+// src/components/Map.jsx (MODIFICADO)
 
 import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import MarkerPopup from './MarkerPopup';
+import MarkerPopup from './MarkerPopup'; // <-- 1. IMPORTAR EL NUEVO COMPONENTE
 
 // --- Iconos personalizados (bikeIcon y barIcon) ---
+// (Tu código de iconos va aquí, no lo borres)
 const bikeIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -25,6 +26,7 @@ const barIcon = new L.Icon({
 // -------------------------------------------------
 
 
+// 2. ACEPTAR LA NUEVA PROP onProximitySearch
 function Map({ markers, children, onProximitySearch }) {
   const mapCenter = [41.3851, 2.1734];
 
@@ -41,38 +43,31 @@ function Map({ markers, children, onProximitySearch }) {
 
       {children}
 
-      {/* --- ESTA ES LA CORRECCIÓN --- */}
-      {markers
-        .filter(marker => {
-          // 1. Primero filtramos los marcadores que NO tienen coordenadas
-          const hasCoords = marker.latitude && marker.longitude;
-          if (!hasCoords) {
-            console.warn('Marcador omitido por falta de coordenadas (filtrado):', marker);
-          }
-          return hasCoords;
-        })
-        .map((marker) => { 
-          // 2. Ahora solo mapeamos los marcadores VÁLIDOS
-          const position = [marker.latitude, marker.longitude];
-          const isBike = marker.type === 'bike';
+      {markers.map((marker, idx) => {
+        if (!marker.latitude || !marker.longitude) {
+          console.warn('Marcador omitido por falta de coordenadas:', marker);
+          return null;
+        }
 
-          return (
-            <Marker 
-              key={marker.uri} // 3. Usamos marker.uri como key (es único y estable)
-              position={position} 
-              icon={isBike ? bikeIcon : barIcon}
-            >
-              <Popup>
-                <MarkerPopup 
-                  marker={marker} 
-                  onProximitySearch={onProximitySearch}
-                />
-              </Popup>
-            </Marker>
-          );
-        })}
-      {/* --- FIN DE LA CORRECCIÓN --- */}
-      
+        const position = [marker.latitude, marker.longitude];
+        const isBike = marker.type === 'bike';
+
+        return (
+          <Marker 
+            key={idx} 
+            position={position} 
+            icon={isBike ? bikeIcon : barIcon}
+          >
+            {/* 3. RENDERIZAR EL NUEVO POPUP */}
+            <Popup>
+              <MarkerPopup 
+                marker={marker} 
+                onProximitySearch={onProximitySearch}
+              />
+            </Popup>
+          </Marker>
+        );
+      })}
     </MapContainer>
   );
 }

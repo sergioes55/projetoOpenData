@@ -1,4 +1,3 @@
-// server.js (COMPLETO Y CORREGIDO)
 
 const express = require('express');
 const cors = require('cors');
@@ -29,7 +28,6 @@ async function initializeStore() {
   console.log("--> [DB] ¡Datos cargados en Oxigraph! Servidor listo para consultas.");
 }
 
-// --- 1. FUNCIÓN SPARQLQuery CORREGIDA ---
 async function sparqlQuery(query, variables) {
   if (!store) {
     console.error("!!! [ERROR] La base de datos (store) no está inicializada.");
@@ -54,7 +52,7 @@ async function sparqlQuery(query, variables) {
   return results;
 }
 
-// --- ENDPOINT DE BICICLETAS (ACTIVO Y CORREGIDO) ---
+// --- ENDPOINT DE BICICLETAS  ---
 app.get('/api/bikingStations', async (req, res) => {
   console.log("\n=============================================");
   console.log("-> [REQUEST] ¡Petición recibida en /api/bikingStations!");
@@ -73,11 +71,17 @@ WHERE {
   OPTIONAL { ?station ns:stationId ?stationId }
   OPTIONAL {
     ?station ns:hasAddress ?address .
-    OPTIONAL { ?address ns:latitude ?latitude }
-    OPTIONAL { ?address ns:longitude ?longitude }
+    
+    # Se requiere Latitud y Longitud si hay dirección
+    ?address ns:latitude ?latitude ;
+             ns:longitude ?longitude .
+    
+    # Los componentes de la dirección son opcionales
     OPTIONAL { ?address ns:addressType ?addressType }
     OPTIONAL { ?address ns:addressName ?addressName }
     OPTIONAL { ?address ns:addressNumber ?addressNumber }
+    
+    # El distrito es opcional
     OPTIONAL {
       ?address ns:hasNeighborhood ?neighborhood .
       ?neighborhood ns:hasDistrict ?district .
@@ -85,10 +89,12 @@ WHERE {
     }
   }
 }`;
+  // ==================================================
   
   try {
     const data = await sparqlQuery(query, queryVariables); 
-    console.log(`[Backend] Datos de GraphDB (Bikes): ${data.length} resultados.`);
+    
+    console.log(`[Backend] Datos de Oxigraph (Bikes): ${data.length} resultados.`);
 
     console.log("--> [SPARQL] Mostrando los 2 primeros resultados BRUTOS (Bikes):");
     console.log(JSON.stringify(data.slice(0, 2), null, 2));
@@ -120,7 +126,7 @@ WHERE {
 });
 
 
-// --- ENDPOINT DE BARES (REACTIVADO Y CORREGIDO) ---
+// --- ENDPOINT DE BARES ---
 app.get('/api/bars', async (req, res) => {
   console.log("\n=============================================");
   console.log("-> [REQUEST] ¡Petición recibida en /api/bars!");
@@ -137,14 +143,22 @@ SELECT ?bar ?barName ?latitude ?longitude ?districtName ?tipo
 WHERE {
   ?bar a ns:Bar .
   OPTIONAL { ?bar ns:barName ?barName }
-  OPTIONAL { ?bar ns:barType ?tipo } 
   OPTIONAL {
     ?bar ns:hasAddress ?address .
-    OPTIONAL { ?address ns:latitude ?latitude }
-    OPTIONAL { ?address ns:longitude ?longitude }
+
+    # Se requiere Latitud y Longitud si hay dirección
+    ?address ns:latitude ?latitude ;
+             ns:longitude ?longitude .
+    
+    # El tipo de bar es opcional
+    OPTIONAL { ?bar ns:barType ?tipo }
+
+    # Los componentes de la dirección son opcionales
     OPTIONAL { ?address ns:addressType ?addressType }
     OPTIONAL { ?address ns:addressName ?addressName }
     OPTIONAL { ?address ns:addressNumber ?addressNumber }
+
+    # El distrito es opcional
     OPTIONAL {
       ?address ns:hasNeighborhood ?neighborhood .
       ?neighborhood ns:hasDistrict ?district .
@@ -152,9 +166,12 @@ WHERE {
     }
   }
 }`;
+  // ==================================================
+
   try {
     const data = await sparqlQuery(query, queryVariables);
-    console.log(`[Backend] Datos de GraphDB (Bars): ${data.length} resultados.`);
+    
+    console.log(`[Backend] Datos de Oxigraph (Bars): ${data.length} resultados.`);
 
     console.log("--> [SPARQL] Mostrando los 2 primeros resultados BRUTOS (Bars):");
     console.log(JSON.stringify(data.slice(0, 2), null, 2));
@@ -187,7 +204,7 @@ WHERE {
 });
 
 
-// --- ENDPOINT DE DISTRITOS (REACTIVADO Y CORREGIDO) ---
+// --- ENDPOINT DE DISTRITOS ---
 app.get('/api/districts', async (req, res) => {
   console.log("\n=============================================");
   console.log("-> [REQUEST] ¡Petición recibida en /api/districts!");
@@ -206,8 +223,6 @@ app.get('/api/districts', async (req, res) => {
   try {
     const data = await sparqlQuery(query, queryVariables);
     
-    // La 'data' ahora es [ { districtName: 'Ciutat Vella' }, { districtName: 'Eixample' } ]
-    // La transformamos a un array simple de strings
     const results = data.map(b => b.districtName);
     console.log(`--> [TRANSFORM] Datos transformados. ${results.length} distritos listos.`);
     res.json(results);
@@ -219,7 +234,7 @@ app.get('/api/districts', async (req, res) => {
 
 
 const PORT = process.env.PORT || 4000;
-const HOST = '0.0.0.0'; // <-- 1. AÑADE ESTA LÍNEA
+const HOST = '0.0.0.0'; // Para Render
 
 initializeStore()
   .then(() => {
